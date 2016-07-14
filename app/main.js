@@ -1,14 +1,8 @@
 var $ = require('jquery');
-var View = require('./views/search');
-var Results = require('./models/results');
+var SearchView = require('./views/search');
 
 // Once the DOM is ready, render the application
 $(function() {
-  var results = new Results;
-  var view = new View({
-    collection: results
-  });
+  var view = new SearchView;
   $("#app_root").html(view.render().el);
-
-  results.fetch();
 });

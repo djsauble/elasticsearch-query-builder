@@ -1,20 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var $ = require('jquery');
-var View = require('./views/search');
-var Results = require('./models/results');
+var SearchView = require('./views/search');
 
 // Once the DOM is ready, render the application
 $(function() {
-  var results = new Results;
-  var view = new View({
-    collection: results
-  });
+  var view = new SearchView;
   $("#app_root").html(view.render().el);
-
-  results.fetch();
 });
 
-},{"./models/results":3,"./views/search":4,"jquery":6}],2:[function(require,module,exports){
+},{"./views/search":5,"jquery":9}],2:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var Model = Backbone.Model.extend({
@@ -23,44 +17,94 @@ var Model = Backbone.Model.extend({
 
 module.exports = Model;
 
-},{"backbone":5}],3:[function(require,module,exports){
+},{"backbone":8}],3:[function(require,module,exports){
 var Backbone = require('backbone');
 var Result = require('./result');
 
 var Collection = Backbone.Collection.extend({
   model: Result,
-  query: '*',
+  searchModel: null,
   url: function() {
-    var url = 'http://localhost:9200/_search?q=' + this.query;
+    var url = 'http://localhost:9200/_search?' +
+              'q=' + this.searchModel.get('query') + '&' +
+              'size=1000';
     return url;
   },
   parse: function(response, options) {
     return response.hits.hits;
+  },
+  setSearchModel: function(model) {
+    this.searchModel = model;
+    this.searchModel.on('change', function(m) {
+      this.fetch();
+    }, this);
   }
 });
 
 module.exports = Collection;
 
-},{"./result":2,"backbone":5}],4:[function(require,module,exports){
-var $ = require('jquery');
+},{"./result":2,"backbone":8}],4:[function(require,module,exports){
 var Backbone = require('backbone');
+
+const DEFAULT_QUERY = "*";
+
+var Model = Backbone.Model.extend({
+  defaults: {
+    "query": DEFAULT_QUERY
+  },
+  search: function(query) {
+    // Default query
+    if (query == "") {
+      this.set({query: DEFAULT_QUERY});
+    }
+    else {
+      this.set({query: query});
+    }
+  }
+});
+
+module.exports = Model;
+
+},{"backbone":8}],5:[function(require,module,exports){
+var Backbone = require('backbone');
+var InputView = require('./searchbox');
+var SearchResultsView = require('./searchresults');
+var SearchModel = require('../models/search');
+var ResultsModel = require('../models/results');
 
 var View = Backbone.View.extend({
   className: "search_app",
   search_results: 0,
   collection: null,
+  inputView: null,
+  resultsView: null,
+  searchModel: null,
 
   initialize: function() {
     var me = this;
 
-    this.collection.on('update', function(results) {
-      me.search_results = results.length;
-      me.render();
+    this.searchModel = new SearchModel();
+
+    this.collection = new ResultsModel;
+    this.collection.setSearchModel(this.searchModel);
+    this.resultsView = new SearchResultsView({
+      collection: this.collection
+    });
+
+    this.inputView = new InputView({
+      model: this.searchModel
     });
   },
 
   render: function() {
-    this.$el.html(`<h1>${this.search_results} search results found</h1>`);
+
+    // Add content to the DOM
+    this.$el.append('<h1>Search Nexus</h1>');
+    this.$el.append(this.inputView.el);
+    this.$el.append(this.resultsView.render().el);
+
+    // Fetch data
+    this.collection.fetch();
 
     return this;
   }
@@ -68,7 +112,45 @@ var View = Backbone.View.extend({
 
 module.exports = View
 
-},{"backbone":5,"jquery":6}],5:[function(require,module,exports){
+},{"../models/results":3,"../models/search":4,"./searchbox":6,"./searchresults":7,"backbone":8}],6:[function(require,module,exports){
+var Backbone = require('backbone');
+
+var View = Backbone.View.extend({
+  tagName: 'input',
+  className: 'search_box',
+  attributes: {
+    'placeholder': 'Enter a query'
+  },
+  events: {
+    'keyup': 'doSearch'
+  },
+  doSearch: function(e) {
+    this.model.search(this.$el.val());
+  }
+});
+
+module.exports = View;
+
+},{"backbone":8}],7:[function(require,module,exports){
+var Backbone = require('backbone');
+
+var View = Backbone.View.extend({
+  tagName: 'p',
+  collection: null,
+  initialize: function() {
+    var me = this;
+    this.collection.on('update', this.render, this);
+  },
+  render: function() {
+    this.$el.html(`${this.collection.length} search results found!`);
+
+    return this;
+  }
+});
+
+module.exports = View;
+
+},{"backbone":8}],8:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -1992,7 +2074,7 @@ module.exports = View
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":6,"underscore":7}],6:[function(require,module,exports){
+},{"jquery":9,"underscore":10}],9:[function(require,module,exports){
 /*eslint-disable no-unused-vars*/
 /*!
  * jQuery JavaScript Library v3.1.0
@@ -12068,7 +12150,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
