@@ -8,7 +8,7 @@ $(function() {
   $("#app_root").html(view.render().el);
 });
 
-},{"./views/app":5,"jquery":9}],2:[function(require,module,exports){
+},{"./views/app":5,"jquery":10}],2:[function(require,module,exports){
 var Backbone = require('backbone');
 
 const DEFAULT_QUERY = "*";
@@ -30,7 +30,7 @@ var Model = Backbone.Model.extend({
 
 module.exports = Model;
 
-},{"backbone":8}],3:[function(require,module,exports){
+},{"backbone":9}],3:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var Model = Backbone.Model.extend({
@@ -39,7 +39,7 @@ var Model = Backbone.Model.extend({
 
 module.exports = Model;
 
-},{"backbone":8}],4:[function(require,module,exports){
+},{"backbone":9}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 var Result = require('./result');
 
@@ -65,7 +65,7 @@ var Collection = Backbone.Collection.extend({
 
 module.exports = Collection;
 
-},{"./result":3,"backbone":8}],5:[function(require,module,exports){
+},{"./result":3,"backbone":9}],5:[function(require,module,exports){
 var Backbone = require('backbone');
 var InputView = require('./input');
 var InputModel = require('../models/input');
@@ -112,7 +112,7 @@ var View = Backbone.View.extend({
 
 module.exports = View
 
-},{"../models/input":2,"../models/results":4,"./input":6,"./results":7,"backbone":8}],6:[function(require,module,exports){
+},{"../models/input":2,"../models/results":4,"./input":6,"./results":8,"backbone":9}],6:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var View = Backbone.View.extend({
@@ -131,18 +131,16 @@ var View = Backbone.View.extend({
 
 module.exports = View;
 
-},{"backbone":8}],7:[function(require,module,exports){
+},{"backbone":9}],7:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var View = Backbone.View.extend({
-  tagName: 'p',
-  collection: null,
-  initialize: function() {
-    var me = this;
-    this.collection.on('update', this.render, this);
-  },
+  tagName: 'li',
   render: function() {
-    this.$el.html(`${this.collection.length} search results`);
+    var attr = this.model.get('_source');
+
+console.log(attr);
+    this.$el.html(`${attr.group}:${attr.name}:${attr.version}`);
 
     return this;
   }
@@ -150,7 +148,44 @@ var View = Backbone.View.extend({
 
 module.exports = View;
 
-},{"backbone":8}],8:[function(require,module,exports){
+},{"backbone":9}],8:[function(require,module,exports){
+var Backbone = require('backbone');
+var ResultView = require('./result');
+
+var View = Backbone.View.extend({
+  tagName: 'ul',
+  collection: null,
+  results: [],
+  initialize: function() {
+    var me = this;
+    this.collection.on('update', this.render, this);
+  },
+  render: function() {
+    var me = this;
+
+    // Remove old entries
+    this.results.forEach(function(r) {
+      r.remove();
+    });
+    this.results = [];
+
+    // Add new entries
+    this.collection.forEach(function(r) {
+      var view = new ResultView({
+        model: r
+      });
+      me.results.push(view);
+      me.$el.append(view.render().el);
+    });
+    //this.$el.html(`${this.collection.length} search results`);
+
+    return this;
+  }
+});
+
+module.exports = View;
+
+},{"./result":7,"backbone":9}],9:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -2074,7 +2109,7 @@ module.exports = View;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":9,"underscore":10}],9:[function(require,module,exports){
+},{"jquery":10,"underscore":11}],10:[function(require,module,exports){
 /*eslint-disable no-unused-vars*/
 /*!
  * jQuery JavaScript Library v3.1.0
@@ -12150,7 +12185,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
