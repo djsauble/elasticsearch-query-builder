@@ -3,6 +3,10 @@
 ## Before you start
 
 * Ensure that an elasticsearch instance is available at `http://localhost:9200`
+* Ensure that the following options are set in `elasticsearch.yml`
+    http.enabled: true
+    http.cors.enabled: true
+    http.cors.allow-origin: "*"
 * Install dependencies with `npm install`
 
 ## Develop
