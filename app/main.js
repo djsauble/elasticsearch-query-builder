@@ -1,10 +1,14 @@
-var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-  host: 'http://localhost:9200'
-});
+var $ = require('jquery');
+var View = require('./views/search');
+var Results = require('./models/results');
 
-client.search({
-  q: '*'
-}).then(function (body) {
-  console.log(`${body.hits.hits.length} results found`);
+// Once the DOM is ready, render the application
+$(function() {
+  var results = new Results;
+  var view = new View({
+    collection: results
+  });
+  $("#app_root").html(view.render().el);
+
+  results.fetch();
 });

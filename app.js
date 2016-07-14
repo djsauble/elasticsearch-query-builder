@@ -18,7 +18,7 @@ const server = http.createServer((req, res) => {
     res.write('<script src="bundle.js"></script>\n');
     res.write('</head>\n');
     res.write('<body>\n');
-    res.write('Home page');
+    res.write('<div id="app_root"></div');
     res.write('</body>\n');
     res.write('</html>\n');
     res.end();
