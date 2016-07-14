@@ -8,7 +8,7 @@ var View = Backbone.View.extend({
     this.collection.on('update', this.render, this);
   },
   render: function() {
-    this.$el.html(`${this.collection.length} search results found!`);
+    this.$el.html(`${this.collection.length} search results`);
 
     return this;
   }

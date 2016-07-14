@@ -1,49 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var $ = require('jquery');
-var SearchView = require('./views/search');
+var AppView = require('./views/app');
 
 // Once the DOM is ready, render the application
 $(function() {
-  var view = new SearchView;
+  var view = new AppView;
   $("#app_root").html(view.render().el);
 });
 
-},{"./views/search":5,"jquery":9}],2:[function(require,module,exports){
-var Backbone = require('backbone');
-
-var Model = Backbone.Model.extend({
-  idAttribute: "_id"
-});
-
-module.exports = Model;
-
-},{"backbone":8}],3:[function(require,module,exports){
-var Backbone = require('backbone');
-var Result = require('./result');
-
-var Collection = Backbone.Collection.extend({
-  model: Result,
-  searchModel: null,
-  url: function() {
-    var url = 'http://localhost:9200/_search?' +
-              'q=' + this.searchModel.get('query') + '&' +
-              'size=1000';
-    return url;
-  },
-  parse: function(response, options) {
-    return response.hits.hits;
-  },
-  setSearchModel: function(model) {
-    this.searchModel = model;
-    this.searchModel.on('change', function(m) {
-      this.fetch();
-    }, this);
-  }
-});
-
-module.exports = Collection;
-
-},{"./result":2,"backbone":8}],4:[function(require,module,exports){
+},{"./views/app":5,"jquery":9}],2:[function(require,module,exports){
 var Backbone = require('backbone');
 
 const DEFAULT_QUERY = "*";
@@ -65,11 +30,46 @@ var Model = Backbone.Model.extend({
 
 module.exports = Model;
 
-},{"backbone":8}],5:[function(require,module,exports){
+},{"backbone":8}],3:[function(require,module,exports){
 var Backbone = require('backbone');
-var InputView = require('./searchbox');
-var SearchResultsView = require('./searchresults');
-var SearchModel = require('../models/search');
+
+var Model = Backbone.Model.extend({
+  idAttribute: "_id"
+});
+
+module.exports = Model;
+
+},{"backbone":8}],4:[function(require,module,exports){
+var Backbone = require('backbone');
+var Result = require('./result');
+
+var Collection = Backbone.Collection.extend({
+  model: Result,
+  inputModel: null,
+  url: function() {
+    var url = 'http://localhost:9200/_search?' +
+              'q=' + this.inputModel.get('query') + '&' +
+              'size=1000';
+    return url;
+  },
+  parse: function(response, options) {
+    return response.hits.hits;
+  },
+  setInputModel: function(model) {
+    this.inputModel = model;
+    this.inputModel.on('change', function(m) {
+      this.fetch();
+    }, this);
+  }
+});
+
+module.exports = Collection;
+
+},{"./result":3,"backbone":8}],5:[function(require,module,exports){
+var Backbone = require('backbone');
+var InputView = require('./input');
+var InputModel = require('../models/input');
+var ResultsView = require('./results');
 var ResultsModel = require('../models/results');
 
 var View = Backbone.View.extend({
@@ -83,11 +83,11 @@ var View = Backbone.View.extend({
   initialize: function() {
     var me = this;
 
-    this.searchModel = new SearchModel();
+    this.searchModel = new InputModel();
 
     this.collection = new ResultsModel;
-    this.collection.setSearchModel(this.searchModel);
-    this.resultsView = new SearchResultsView({
+    this.collection.setInputModel(this.searchModel);
+    this.resultsView = new ResultsView({
       collection: this.collection
     });
 
@@ -112,7 +112,7 @@ var View = Backbone.View.extend({
 
 module.exports = View
 
-},{"../models/results":3,"../models/search":4,"./searchbox":6,"./searchresults":7,"backbone":8}],6:[function(require,module,exports){
+},{"../models/input":2,"../models/results":4,"./input":6,"./results":7,"backbone":8}],6:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var View = Backbone.View.extend({
@@ -142,7 +142,7 @@ var View = Backbone.View.extend({
     this.collection.on('update', this.render, this);
   },
   render: function() {
-    this.$el.html(`${this.collection.length} search results found!`);
+    this.$el.html(`${this.collection.length} search results`);
 
     return this;
   }

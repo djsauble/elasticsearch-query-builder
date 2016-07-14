@@ -1,7 +1,7 @@
 var Backbone = require('backbone');
-var InputView = require('./searchbox');
-var SearchResultsView = require('./searchresults');
-var SearchModel = require('../models/search');
+var InputView = require('./input');
+var InputModel = require('../models/input');
+var ResultsView = require('./results');
 var ResultsModel = require('../models/results');
 
 var View = Backbone.View.extend({
@@ -15,11 +15,11 @@ var View = Backbone.View.extend({
   initialize: function() {
     var me = this;
 
-    this.searchModel = new SearchModel();
+    this.searchModel = new InputModel();
 
     this.collection = new ResultsModel;
-    this.collection.setSearchModel(this.searchModel);
-    this.resultsView = new SearchResultsView({
+    this.collection.setInputModel(this.searchModel);
+    this.resultsView = new ResultsView({
       collection: this.collection
     });
 

@@ -15,6 +15,7 @@ const server = http.createServer((req, res) => {
     res.write('<!DOCTYPE html>\n');
     res.write('<html>\n');
     res.write('<head>\n');
+    res.write('<link href="styles.css" type="text/css" rel="stylesheet"/>\n');
     res.write('<script src="bundle.js"></script>\n');
     res.write('</head>\n');
     res.write('<body>\n');
