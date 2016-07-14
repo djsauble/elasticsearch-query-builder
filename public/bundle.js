@@ -1,23 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-  host: 'http://localhost:9200',
-  log: 'trace'
+  host: 'http://localhost:9200'
 });
 
-client.ping({
-  // ping usually has a 3000ms timeout
-  requestTimeout: Infinity,
-  
-  // undocumented params are appended to the query string
-  hello: "elasticsearch!"
-}, function (error) {
-  if (error) {
-    console.trace('elasticsearch cluster is down!');
-  }
-  else {
-    console.log('All is well');
-  }
+client.search({
+  q: '*'
+}).then(function (body) {
+  console.log(`${body.hits.hits.length} results found`);
 });
 
 },{"elasticsearch":3}],2:[function(require,module,exports){
